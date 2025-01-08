@@ -36,8 +36,11 @@ services:
       - "6789:6789" # Porta de acesso ao Mage.ai
     volumes:
       - ./mage:/home/src # Mapeia o diretório local para o Mage.ai
+      - ./.env:/home/src/.env # Mapeia o arquivo .env
+      - ./requirements.txt:/home/src/requirements.txt # Mapeia o arquivo requirements.txt
     command: >
       sh -c "
+      pip install -r /home/src/requirements.txt &&
       mage start --host 0.0.0.0
       "
 
