@@ -3,4 +3,6 @@ requests
 minio
 spotipy
 pandas
-
+boto3
+pyarrow
+s3fs
