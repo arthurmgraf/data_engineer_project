@@ -1,59 +1,88 @@
 version: '3.9'
+
 services:
   minio:
     image: minio/minio
     container_name: minio
-    environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
     ports:
       - "9000:9000" # Porta de acesso à API do MinIO
       - "9001:9001" # Porta de acesso ao console do MinIO
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    command: server /data --console-address ":9001"
     volumes:
       - ./data:/data # Mapeie o diretório local "data" para armazenar os arquivos no MinIO
-    command: server /data --console-address ":9001"
 
-  trino:
-    image: trinodb/trino
-    container_name: trino
-    ports:
-      - "8080:8080" # Porta para acessar o Trino
-
-  postgres:
-    image: postgres
-    container_name: postgres
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: spotify
-    ports:
-      - "5432:5432" # Porta padrão para conexões PostgreSQL
-    volumes:
-      - ./postgres_data:/var/lib/postgresql/data # Diretório persistente para dados do Postgres
-
-  superset:
-    image: apache/superset
-    container_name: superset
-    environment:
-      SUPERSET_LOAD_EXAMPLES: "no"
-      SUPERSET_SECRET_KEY: "your_secret_key"
-      SUPERSET_DATABASE_URL: "postgresql+psycopg2://postgres:postgres@postgres:5432/spotify"
-    ports:
-      - "8088:8088" # Porta de acesso ao Superset
-    depends_on:
-      - postgres # Garante que o PostgreSQL será iniciado antes do Superset
-
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: spotify_app
-    env_file:
-      - .env
-    volumes:
-      - ./scripts:/app/scripts
-      - ./logs:/app/logs
+  minio-mc:
+    image: minio/mc:latest
+    container_name: minio-mc
     depends_on:
       - minio
-    command: python /app/scripts/main.py
+    entrypoint: >
+      sh -c "
+      sleep 10 &&
+      mc alias set myminio http://minio:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD} &&
+      mc mb myminio/landing &&
+      mc mb myminio/bronze &&
+      mc mb myminio/silver &&
+      mc mb myminio/gold
+      "
 
+  mage:
+    image: mageai/mageai:latest
+    container_name: mage
+    ports:
+      - "6789:6789" # Porta de acesso ao Mage.ai
+    volumes:
+      - ./mage:/home/src # Mapeia o diretório local para o Mage.ai
+    command: >
+      sh -c "
+      mage start --host 0.0.0.0
+      "
+
+#  trino:
+#    image: trinodb/trino
+#    container_name: trino
+#    ports:
+#      - "8080:8080" # Porta para acessar o Trino
+#
+#  postgres:
+#    image: postgres
+#    container_name: postgres
+#    environment:
+#      POSTGRES_USER: postgres
+#      POSTGRES_PASSWORD: postgres
+#      POSTGRES_DB: spotify
+#    ports:
+#      - "5432:5432" # Porta padrão para conexões PostgreSQL
+#    volumes:
+#      - ./postgres_data:/var/lib/postgresql/data # Diretório persistente para dados do Postgres
+#
+#  superset:
+#    image: apache/superset
+#    container_name: superset
+#    environment:
+#      SUPERSET_LOAD_EXAMPLES: "no"
+#      SUPERSET_SECRET_KEY: "your_secret_key"
+#      SUPERSET_DATABASE_URL: "postgresql+psycopg2://postgres:postgres@postgres:5432/spotify"
+#    ports:
+#      - "8088:8088" # Porta de acesso ao Superset
+#    depends_on:
+#      - postgres # Garante que o PostgreSQL será iniciado antes do Superset
+#
+#  app:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    container_name: spotify_app
+#    env_file:
+#      - .env
+#    volumes:
+#      - ./scripts:/app/scripts
+#      - ./logs:/app/logs
+#    depends_on:
+#      - minio
+#    command: python /app/scripts/main.py
+#
+#
