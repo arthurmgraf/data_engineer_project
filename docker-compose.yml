@@ -4,8 +4,8 @@ services:
     image: minio/minio
     container_name: minio
     environment:
-      MINIO_ROOT_USER: {COLOQUE AQUI O NOME DO USUÁRIO DO MINIO, PADRÃO: minioadmin}
-      MINIO_ROOT_PASSWORD: {COLOQUE AQUI A SENHA DO MINIO, PADRÃO: minioadmin}
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
     ports:
       - "9000:9000" # Porta de acesso à API do MinIO
       - "9001:9001" # Porta de acesso ao console do MinIO
@@ -18,15 +18,14 @@ services:
     container_name: trino
     ports:
       - "8080:8080" # Porta para acessar o Trino
-    # OBS: Você pode adicionar configurações personalizadas nos arquivos do Trino na pasta ./configs se necessário.
 
   postgres:
     image: postgres
     container_name: postgres
     environment:
-      POSTGRES_USER: {COLOQUE AQUI O NOME DO USUÁRIO DO POSTGRES, PADRÃO: postgres}
-      POSTGRES_PASSWORD: {COLOQUE AQUI A SENHA DO POSTGRES, PADRÃO: postgres}
-      POSTGRES_DB: {COLOQUE AQUI O NOME DO BANCO DE DADOS, PADRÃO: spotify}
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: spotify
     ports:
       - "5432:5432" # Porta padrão para conexões PostgreSQL
     volumes:
@@ -36,11 +35,25 @@ services:
     image: apache/superset
     container_name: superset
     environment:
-      SUPERSET_LOAD_EXAMPLES: "no" # Não carregar exemplos no Superset (altere para "yes" se desejar exemplos)
-      SUPERSET_SECRET_KEY: {COLOQUE AQUI UMA CHAVE SECRETA PARA O SUPERSET}
-      SUPERSET_DATABASE_URL: {URL DE CONEXÃO DO POSTGRES, PADRÃO: postgresql+psycopg2://postgres:postgres@postgres:5432/spotify}
+      SUPERSET_LOAD_EXAMPLES: "no"
+      SUPERSET_SECRET_KEY: "your_secret_key"
+      SUPERSET_DATABASE_URL: "postgresql+psycopg2://postgres:postgres@postgres:5432/spotify"
     ports:
       - "8088:8088" # Porta de acesso ao Superset
     depends_on:
       - postgres # Garante que o PostgreSQL será iniciado antes do Superset
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: spotify_app
+    env_file:
+      - .env
+    volumes:
+      - ./scripts:/app/scripts
+      - ./logs:/app/logs
+    depends_on:
+      - minio
+    command: python /app/scripts/main.py
 
