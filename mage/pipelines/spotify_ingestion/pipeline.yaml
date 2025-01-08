@@ -1,0 +1,13 @@
+name: spotify_ingestion
+blocks:
+  - name: SpotifyAPIBlock
+    type: transformer
+    file_path: blocks/spotify_api_block.py
+
+  - name: StorageBlock
+    type: transformer
+    file_path: blocks/storage_block.py
+
+connections:
+  - from: SpotifyAPIBlock
+    to: StorageBlock
