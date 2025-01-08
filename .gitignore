@@ -1,16 +1,1 @@
-# Logs
-logs/
-*.log
-
-# Dados
-data/bronze/
-data/silver/
-data/gold/
-
-# Configurações locais
-configs/
-
-# Docker
-docker-compose.override.yml
-.docker/
 
