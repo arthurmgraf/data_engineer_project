@@ -1,1 +1,1 @@
-{"groups": {"type": {}}, "models": {}}
+{"groups": {"type": {"python": ["src:still_treasure"]}}, "models": {"src:still_treasure": {"added_at": 1736321721.567827, "pipeline": {"created_at": "2025-01-08 07:35:21.560110+00:00", "description": "test", "name": "still treasure", "tags": [], "type": "python", "uuid": "still_treasure", "blocks": []}, "updated_at": 1736321721.567912}}}
