@@ -12,7 +12,7 @@ services:
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     command: server /data --console-address ":9001"
     volumes:
-      - ./data:/data # Mapeie o diretório local "data" para armazenar os arquivos no MinIO
+      - ./data_minio:/data_minio # Mapeie o diretório local "data" para armazenar os arquivos no MinIO
 
   minio-mc:
     image: minio/mc:latest
@@ -35,7 +35,7 @@ services:
     ports:
       - "6789:6789" # Porta de acesso ao Mage.ai
     volumes:
-      - ./mage:/home/src # Mapeia o diretório local para o Mage.ai
+      - ./data_mage:/home/src # Mapeia o diretório local para o Mage.ai
       - ./.env:/home/src/.env # Mapeia o arquivo .env
       - ./requirements.txt:/home/src/requirements.txt # Mapeia o arquivo requirements.txt
     command: >
@@ -44,48 +44,61 @@ services:
       mage start --host 0.0.0.0
       "
 
-#  trino:
-#    image: trinodb/trino
-#    container_name: trino
-#    ports:
-#      - "8080:8080" # Porta para acessar o Trino
-#
-#  postgres:
-#    image: postgres
-#    container_name: postgres
-#    environment:
-#      POSTGRES_USER: postgres
-#      POSTGRES_PASSWORD: postgres
-#      POSTGRES_DB: spotify
-#    ports:
-#      - "5432:5432" # Porta padrão para conexões PostgreSQL
-#    volumes:
-#      - ./postgres_data:/var/lib/postgresql/data # Diretório persistente para dados do Postgres
-#
-#  superset:
-#    image: apache/superset
-#    container_name: superset
-#    environment:
-#      SUPERSET_LOAD_EXAMPLES: "no"
-#      SUPERSET_SECRET_KEY: "your_secret_key"
-#      SUPERSET_DATABASE_URL: "postgresql+psycopg2://postgres:postgres@postgres:5432/spotify"
-#    ports:
-#      - "8088:8088" # Porta de acesso ao Superset
-#    depends_on:
-#      - postgres # Garante que o PostgreSQL será iniciado antes do Superset
-#
-#  app:
-#    build:
-#      context: .
-#      dockerfile: Dockerfile
-#    container_name: spotify_app
-#    env_file:
-#      - .env
-#    volumes:
-#      - ./scripts:/app/scripts
-#      - ./logs:/app/logs
-#    depends_on:
-#      - minio
-#    command: python /app/scripts/main.py
-#
-#
+  trino:
+    image: trinodb/trino
+    container_name: trino
+    ports:
+      - "8080:8080" # Porta para acessar o Trino
+    depends_on:
+      - minio
+    volumes:
+      - ./data_trino:/etc/trino # Mapeia um diretório local com configurações do Trino
+      
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - 6379:6379
+
+  superset-db:
+    image: postgres:13
+    container_name: superset-db
+    environment:
+      POSTGRES_USER: superset
+      POSTGRES_PASSWORD: superset
+      POSTGRES_DB: superset
+    volumes:
+      - superset-db-data:/var/lib/postgresql/data
+
+  superset:
+    build:
+      context: .
+      dockerfile: ./data_superset/superset.Dockerfile
+    container_name: superset
+    environment:
+      SUPERSET_CONFIG_PATH: /app/pythonpath/superset_config.py
+      PYTHONPATH: /app/pythonpath
+      POSTGRES_USER: superset
+      POSTGRES_PASSWORD: superset
+      POSTGRES_DB: superset
+      POSTGRES_HOST: superset-db
+    volumes:
+      - ./data_superset:/app/pythonpath
+      - superset-data:/app/superset_home
+    ports:
+      - 8088:8088
+    depends_on:
+      - redis
+      - superset-db
+    entrypoint:
+      - sh
+      - -c
+      - |
+        superset fab create-admin --username admin --firstname Superset --lastname Admin --email admin@superset.com --password admin && \
+        superset db upgrade && \
+        superset init && \
+        superset run --host 0.0.0.0 -p 8088 --with-threads --reload
+
+volumes:
+  superset-db-data:
+  superset-data:
