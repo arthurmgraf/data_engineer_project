@@ -21,6 +21,15 @@ O objetivo principal é **destacar habilidades em engenharia de dados** com tecn
 
 ---
 
+
+---
+
+## Integração DBT com ClickHouse:
+
+https://clickhouse.com/docs/en/integrations/dbt
+
+---
+
 ## 🏗️ Arquitetura do Projeto (Medalhão Simplificada - AWS S3)  
 
 O projeto segue a **Arquitetura Medalhão**, organizada em **três camadas principais**:  
@@ -39,6 +48,40 @@ O projeto segue a **Arquitetura Medalhão**, organizada em **três camadas princ
 4. **Visualização**: Dados da camada **Gold** são utilizados para criar **dashboards interativos no Superset**.  
 
 ---
+
+
+⚙️ Fluxograma de dados:
+
+┌──────────────────────┐      ┌───────────────────────────────┐      ┌──────────────────────────────┐
+│ 📥 Fonte de Dados:   │----->│ ➡️ Bloco Mage.ai (Python):   │----->│ ➡️ Bloco Mage.ai (DBT):      │
+│     API Spotify      │      │     Ingestão Bronze           │      │     Testes Bronze            │
+└──────────────────────┘      └───────────────────────────────┘      └─────────── Losango Laranja ──┘
+                                         │ Salva JSON Bruto no S3 (Bronze) │              /    \
+                                         └───────────────────────────────┘             ✅ OK   ❌ Falha
+                                                │                                        │       └── Alerta/
+                                                │                                        │            Interrupção
+ ┌──────────────────────┐       ────────────────┌────────────────────────────────────────┐───────────┐
+ │ ➡️ Camada Bronze     │----->│ ➡️ Bloco Mage.ai (Spark):    │----->│ ➡️ Bloco Mage.ai (DBT):      │
+ │     (S3 - Raw)       │      │   Transformação Silver        │      │     Testes Silver            │
+ └──────────────────────┘      └───────────────────────────────┘      └─────────── Losango Laranja ──┘
+                                         │ Lê Bronze (S3), Limpa/Padroniza │              /    \
+                                         │ Salva Parquet no S3 (Silver)    │             ✅ OK   ❌ Falha
+                                         │  **(com Spark)**                │             │       └── Alerta/
+                                         └─────────────────────────────────┘             │            Interrupção
+                                                │                                        │
+ ┌──────────────────────┐       ────────────────┌────────────────────────────────────────┐────────────────┐──────
+ │ ➡️ Camada Silver     │----->│ ➡️ Bloco Mage.ai (DBT):      │----->│ ➡️ Camada Gold       │----->│ 📊 Superset:
+ │     (S3 - Clean)     │      │   Transformação & Testes Gold │      │    (ClickHouse)      │      │ Dashboards
+ └──────────────────────┘      └───────────────────────────────┘      └──────────────────────┘      └──────────────┘
+                                         │ Lê Silver (S3), Modela (DBT)  │
+                                         │ Salva Gold (ClickHouse/S3 opc)│
+                                         │ + Testes Gold                 │
+                                         └───────────────────────────────┘
+                                                  Losango Laranja
+                                                      /    \
+                                                     ✅ OK   ❌ Falha
+                                                              └── Alerta/
+                                                                  Interrupção
 
 ## 🛠 Execução Local com Docker Compose  
 
@@ -68,14 +111,6 @@ Mage.ai UI: http://localhost:6789
 Superset UI: http://localhost:8088
 Credenciais: admin/admin
 
-
-⚙️ Executando o Data Pipeline no Mage.ai
-Acesse a UI do Mage.ai.
-Execute os pipelines na seguinte ordem:
-Bronze Ingestion Pipeline
-Silver Transformation Pipeline
-Gold DBT Transformation Pipeline
-Monitore a execução dos pipelines.
 
 📊 Explorando Dashboards no Superset
 Acesse a UI do Superset.
