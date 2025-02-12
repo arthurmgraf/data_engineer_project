@@ -38,17 +38,8 @@ O projeto segue a **Arquitetura Medalhão**, organizada em **três camadas princ
 
 ---
 
-## 🔄 Fluxo de Dados  
 
-1. **Ingestão**: Dados são extraídos da **API do Spotify** e armazenados na camada **Bronze**.  
-2. **Transformação**: Dados da camada **Bronze** são limpos e padronizados na camada **Silver**.  
-3. **Modelagem**: Dados da camada **Silver** são agregados e modelados na camada **Gold**.  
-4. **Visualização**: Dados da camada **Gold** são utilizados para criar **dashboards interativos no Superset**.  
-
----
-
-
-### ⚙️Fluxograma de dados:
+#### 🔄 Fluxo de Dados  
 
 ```bash
 
