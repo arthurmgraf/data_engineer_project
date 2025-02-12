@@ -28,7 +28,8 @@ O objetivo principal é **destacar habilidades em engenharia de dados** com tecn
 
 https://clickhouse.com/docs/en/integrations/dbt
 
----
+
+
 
 ## 🏗️ Arquitetura do Projeto (Medalhão Simplificada - AWS S3)  
 
@@ -51,6 +52,8 @@ O projeto segue a **Arquitetura Medalhão**, organizada em **três camadas princ
 
 
 ⚙️ Fluxograma de dados:
+
+```bash
 
 ┌──────────────────────┐      ┌───────────────────────────────┐      ┌──────────────────────────────┐
 │ 📥 Fonte de Dados:   │----->│ ➡️ Bloco Mage.ai (Python):   │----->│ ➡️ Bloco Mage.ai (DBT):      │
@@ -82,6 +85,8 @@ O projeto segue a **Arquitetura Medalhão**, organizada em **três camadas princ
                                                      ✅ OK   ❌ Falha
                                                               └── Alerta/
                                                                   Interrupção
+
+```
 
 ## 🛠 Execução Local com Docker Compose  
 
