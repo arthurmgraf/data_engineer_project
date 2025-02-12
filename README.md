@@ -68,6 +68,7 @@ Mage.ai UI: http://localhost:6789
 Superset UI: http://localhost:8088
 Credenciais: admin/admin
 
+
 ⚙️ Executando o Data Pipeline no Mage.ai
 Acesse a UI do Mage.ai.
 Execute os pipelines na seguinte ordem:
@@ -87,15 +88,7 @@ Explore os dashboards pré-criados ou crie novos.
 ✅ Melhorias nos dashboards.
 ✅ Implementação de CI/CD para automação.
 ✅ Monitoramento avançado para análise de desempenho.
-🎯 Apresentando no LinkedIn
-Para destacar este projeto no LinkedIn, siga estas dicas:
 
-✅ Título Chamativo: Algo que capte a atenção.
-✅ Descrição Detalhada: Explique a arquitetura, tecnologias e insights.
-✅ Link para o GitHub: Facilite o acesso ao código.
-✅ Demonstração Visual: Adicione screenshots e vídeos do pipeline e dashboards.
-✅ Palavras-chave Relevantes: Utilize termos como Data Engineering, AWS, Spotify API, Mage.ai, Spark, DBT, ClickHouse, Superset.
-✅ Compartilhe um Post: Engaje com sua rede profissional.
 
 ⚠️ Disclaimer
 Este projeto é para fins educacionais e de demonstração. O uso da API do Spotify está sujeito aos termos de serviço e limitações de rate limiting.
