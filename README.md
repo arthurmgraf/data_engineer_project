@@ -21,9 +21,6 @@ O objetivo principal é **destacar habilidades em engenharia de dados** com tecn
 
 ---
 
-
----
-
 ## Integração DBT com ClickHouse:
 
 https://clickhouse.com/docs/en/integrations/dbt
@@ -51,7 +48,7 @@ O projeto segue a **Arquitetura Medalhão**, organizada em **três camadas princ
 ---
 
 
-⚙️ Fluxograma de dados:
+###⚙️ Fluxograma de dados:
 
 ```bash
 
