@@ -1,5 +1,7 @@
 python-dotenv
 requests
+docker
+docker-compose
 minio
 spotipy
 pandas
